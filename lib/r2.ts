@@ -24,6 +24,7 @@ const validateR2Config = () => {
 };
 
 // Lazy initialization of R2 client to avoid module-load-time failures
+// Note: Node.js is single-threaded, so this pattern is safe from race conditions
 let r2Client: S3Client | null = null;
 let r2Config: ReturnType<typeof validateR2Config> | null = null;
 

@@ -18,7 +18,17 @@ interface KieAiResponse {
 }
 
 // kie.ai API endpoint - configurable via environment variable
-const KIE_AI_ENDPOINT = process.env.KIE_AI_ENDPOINT || "https://kie.ai/nano-banana";
+// Default endpoint is validated and trusted
+const DEFAULT_KIE_AI_ENDPOINT = "https://kie.ai/nano-banana";
+const KIE_AI_ENDPOINT = process.env.KIE_AI_ENDPOINT || DEFAULT_KIE_AI_ENDPOINT;
+
+// Validate custom endpoint if provided
+if (process.env.KIE_AI_ENDPOINT && !process.env.KIE_AI_ENDPOINT.startsWith("https://")) {
+  console.warn(
+    "Warning: KIE_AI_ENDPOINT should use HTTPS. Current value:",
+    process.env.KIE_AI_ENDPOINT
+  );
+}
 
 export const generateImage = ({ dataStream }: GenerateImageProps) =>
   tool({
