@@ -6,11 +6,19 @@ type GenerateImageProps = {
   dataStream: UIMessageStreamWriter<ChatMessage>;
 };
 
+// Expected response format from kie.ai API
+// The actual field names may vary - common patterns include:
+// - "image": base64-encoded image data
+// - "data": image data or URL
+// - "url": direct URL to generated image
 interface KieAiResponse {
-  image?: string;
-  data?: string;
-  url?: string;
+  image?: string;  // Base64 or URL
+  data?: string;   // Image data
+  url?: string;    // Direct URL
 }
+
+// kie.ai API endpoint - configurable via environment variable
+const KIE_AI_ENDPOINT = process.env.KIE_AI_ENDPOINT || "https://kie.ai/nano-banana";
 
 export const generateImage = ({ dataStream }: GenerateImageProps) =>
   tool({
@@ -20,7 +28,7 @@ export const generateImage = ({ dataStream }: GenerateImageProps) =>
     }),
     execute: async ({ prompt }: { prompt: string }) => {
       try {
-        const response = await fetch("https://kie.ai/nano-banana", {
+        const response = await fetch(KIE_AI_ENDPOINT, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -37,11 +45,15 @@ export const generateImage = ({ dataStream }: GenerateImageProps) =>
 
         const data: KieAiResponse = await response.json();
         
-        // Extract image data - prioritize known response fields
+        // Extract image data - try known response field patterns
+        // Priority: direct image data > URL
         const imageData = data.image || data.data || data.url;
         
         if (!imageData) {
-          throw new Error("kie.ai API returned unexpected response format - no image data found");
+          throw new Error(
+            "kie.ai API returned unexpected response format - no image data found. " +
+            "Expected one of: 'image', 'data', or 'url' fields"
+          );
         }
 
         // Stream the image data to the client

@@ -7,6 +7,7 @@ const validateR2Config = () => {
     R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
     R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
     R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
+    R2_PUBLIC_DOMAIN: process.env.R2_PUBLIC_DOMAIN,
   };
 
   const missingVars = Object.entries(requiredVars)
@@ -19,24 +20,27 @@ const validateR2Config = () => {
     );
   }
 
-  return requiredVars;
+  return requiredVars as Record<keyof typeof requiredVars, string>;
 };
 
-// Initialize R2 client with validation
-const initR2Client = () => {
-  const config = validateR2Config();
-  
-  return new S3Client({
-    region: "auto",
-    endpoint: config.R2_ENDPOINT,
-    credentials: {
-      accessKeyId: config.R2_ACCESS_KEY_ID!,
-      secretAccessKey: config.R2_SECRET_ACCESS_KEY!,
-    },
-  });
-};
+// Lazy initialization of R2 client to avoid module-load-time failures
+let r2Client: S3Client | null = null;
+let r2Config: ReturnType<typeof validateR2Config> | null = null;
 
-const r2Client = initR2Client();
+const getR2Client = () => {
+  if (!r2Client || !r2Config) {
+    r2Config = validateR2Config();
+    r2Client = new S3Client({
+      region: "auto",
+      endpoint: r2Config.R2_ENDPOINT,
+      credentials: {
+        accessKeyId: r2Config.R2_ACCESS_KEY_ID,
+        secretAccessKey: r2Config.R2_SECRET_ACCESS_KEY,
+      },
+    });
+  }
+  return { client: r2Client, config: r2Config };
+};
 
 export interface UploadResult {
   url: string;
@@ -49,31 +53,19 @@ export async function uploadToR2(
   fileBuffer: ArrayBuffer,
   contentType: string
 ): Promise<UploadResult> {
-  const bucket = process.env.R2_BUCKET_NAME;
-  
-  if (!bucket) {
-    throw new Error("R2_BUCKET_NAME environment variable is not set");
-  }
+  const { client, config } = getR2Client();
 
   const command = new PutObjectCommand({
-    Bucket: bucket,
+    Bucket: config.R2_BUCKET_NAME,
     Key: filename,
     Body: Buffer.from(fileBuffer),
     ContentType: contentType,
   });
 
-  await r2Client.send(command);
+  await client.send(command);
 
-  // Use public domain if configured, otherwise throw error
-  const publicDomain = process.env.R2_PUBLIC_DOMAIN;
-  
-  if (!publicDomain) {
-    throw new Error(
-      "R2_PUBLIC_DOMAIN environment variable is required for generating public URLs"
-    );
-  }
-
-  const url = `${publicDomain}/${filename}`;
+  // Generate public URL using configured domain
+  const url = `${config.R2_PUBLIC_DOMAIN}/${filename}`;
 
   return {
     url,
