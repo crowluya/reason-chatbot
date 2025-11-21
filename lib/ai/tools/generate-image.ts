@@ -1,7 +1,18 @@
-import { tool } from "ai";
+import { tool, type UIMessageStreamWriter } from "ai";
 import { z } from "zod";
+import type { ChatMessage } from "@/lib/types";
 
-export const generateImage = ({ dataStream }: { dataStream: any }) =>
+type GenerateImageProps = {
+  dataStream: UIMessageStreamWriter<ChatMessage>;
+};
+
+interface KieAiResponse {
+  image?: string;
+  data?: string;
+  url?: string;
+}
+
+export const generateImage = ({ dataStream }: GenerateImageProps) =>
   tool({
     description: "Generate an image based on a text prompt using kie.ai nano-banana model",
     inputSchema: z.object({
@@ -24,11 +35,14 @@ export const generateImage = ({ dataStream }: { dataStream: any }) =>
           throw new Error(`Image generation failed: ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const data: KieAiResponse = await response.json();
         
-        // Assuming the API returns base64 image data
-        // If the format is different, we'll need to adjust this
-        const imageData = data.image || data.data || data;
+        // Extract image data - prioritize known response fields
+        const imageData = data.image || data.data || data.url;
+        
+        if (!imageData) {
+          throw new Error("kie.ai API returned unexpected response format - no image data found");
+        }
 
         // Stream the image data to the client
         dataStream.write({
