@@ -4,10 +4,10 @@ import { z } from "zod";
 export const generateImage = ({ dataStream }: { dataStream: any }) =>
   tool({
     description: "Generate an image based on a text prompt using kie.ai nano-banana model",
-    parameters: z.object({
+    inputSchema: z.object({
       prompt: z.string().describe("The description of the image to generate"),
     }),
-    execute: async ({ prompt }) => {
+    execute: async ({ prompt }: { prompt: string }) => {
       try {
         const response = await fetch("https://kie.ai/nano-banana", {
           method: "POST",

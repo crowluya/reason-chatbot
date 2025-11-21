@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
+import { LandingPage } from "@/components/landing-page";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
 import { auth } from "../(auth)/auth";
@@ -9,8 +9,9 @@ import { auth } from "../(auth)/auth";
 export default async function Page() {
   const session = await auth();
 
+  // Show landing page for non-authenticated users
   if (!session) {
-    redirect("/api/auth/guest");
+    return <LandingPage />;
   }
 
   const id = generateUUID();
