@@ -15,6 +15,19 @@ export default async function Layout({
   const [session, cookieStore] = await Promise.all([auth(), cookies()]);
   const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
 
+  // For unauthenticated users, show only the content without sidebar
+  if (!session) {
+    return (
+      <>
+        <Script
+          src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
+          strategy="beforeInteractive"
+        />
+        <DataStreamProvider>{children}</DataStreamProvider>
+      </>
+    );
+  }
+
   return (
     <>
       <Script

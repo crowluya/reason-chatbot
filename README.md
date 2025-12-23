@@ -1,14 +1,13 @@
 <a href="https://chat.vercel.ai/">
   <img alt="Next.js 14 and App Router-ready AI chatbot." src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chat SDK</h1>
+  <h1 align="center">AI Reasoning Chat</h1>
 </a>
 
 <p align="center">
-    Chat SDK is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
+    An advanced AI chatbot built with Next.js and the AI SDK featuring OpenRouter models, kie.ai image generation, and Cloudflare R2 storage.
 </p>
 
 <p align="center">
-  <a href="https://chat-sdk.dev"><strong>Read Docs</strong></a> ·
   <a href="#features"><strong>Features</strong></a> ·
   <a href="#model-providers"><strong>Model Providers</strong></a> ·
   <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
@@ -24,37 +23,80 @@
 - [AI SDK](https://ai-sdk.dev/docs/introduction)
   - Unified API for generating text, structured objects, and tool calls with LLMs
   - Hooks for building dynamic chat and generative user interfaces
-  - Supports xAI (default), OpenAI, Fireworks, and other model providers
+  - **OpenRouter integration** for access to multiple AI models
+- **AI Models**
+  - [Claude 3.5 Sonnet](https://www.anthropic.com/claude) - Advanced multimodal model with vision capabilities
+  - [OpenAI o1-mini](https://openai.com/o1/) - Advanced reasoning model with chain-of-thought capabilities
+  - **kie.ai nano-banana** - Image generation capabilities
 - [shadcn/ui](https://ui.shadcn.com)
   - Styling with [Tailwind CSS](https://tailwindcss.com)
   - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
 - Data Persistence
   - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
+  - **[Cloudflare R2](https://www.cloudflare.com/products/r2/)** for efficient and cost-effective file storage
 - [Auth.js](https://authjs.dev)
   - Simple and secure authentication
+- **Modern Landing Page**
+  - Feature showcase with hero section
+  - Clear call-to-action for new users
 
 ## Model Providers
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. The default configuration includes [xAI](https://x.ai) models (`grok-2-vision-1212`, `grok-3-mini`) routed through the gateway.
+This template uses [OpenRouter](https://openrouter.ai/) to access multiple AI models through a unified interface. The default configuration includes:
 
-### AI Gateway Authentication
+- **Claude 3.5 Sonnet** - For general chat with vision capabilities
+- **OpenAI o1-mini** - For advanced reasoning tasks
+- **kie.ai nano-banana** - For image generation
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
+### OpenRouter Configuration
 
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
+OpenRouter provides access to various AI models with a single API key. To use OpenRouter:
 
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+### OpenRouter Configuration
+
+OpenRouter provides access to various AI models with a single API key. To use OpenRouter:
+
+1. Sign up at [OpenRouter](https://openrouter.ai/)
+2. Get your API key from the dashboard
+3. Add `OPENROUTER_API_KEY` to your environment variables
+
+### Storage Configuration
+
+This project uses **Cloudflare R2** for file storage instead of Vercel Blob. R2 is S3-compatible and offers cost-effective storage:
+
+1. Create a Cloudflare account and set up R2
+2. Create an R2 bucket
+3. Generate API tokens with R2 read/write permissions
+4. Add the following to your environment variables:
+   - `R2_ENDPOINT`
+   - `R2_ACCESS_KEY_ID`
+   - `R2_SECRET_ACCESS_KEY`
+   - `R2_BUCKET_NAME`
+   - `R2_PUBLIC_DOMAIN`
+
+### Image Generation
+
+Image generation is powered by **kie.ai nano-banana** model:
+
+1. Get your kie.ai API key
+2. Add `KIE_AI_API_KEY` to your environment variables
+3. Request image generation through natural language in chat
 
 ## Deploy Your Own
 
-You can deploy your own version of the Next.js AI Chatbot to Vercel with one click:
+You can deploy your own version of the AI Reasoning Chat to Vercel or any Node.js hosting platform.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/nextjs-ai-chatbot)
+**Note**: When deploying, ensure all required environment variables are set:
+- `AUTH_SECRET`
+- `OPENROUTER_API_KEY`
+- `KIE_AI_API_KEY`
+- `POSTGRES_URL`
+- `REDIS_URL` (optional, for resumable streams)
+- R2 configuration variables
 
 ## Running locally
 
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
+You will need to use the environment variables [defined in `.env.example`](.env.example) to run the chatbot.
 
 > Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
 

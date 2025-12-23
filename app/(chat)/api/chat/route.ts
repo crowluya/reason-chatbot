@@ -23,6 +23,7 @@ import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
+import { generateImage } from "@/lib/ai/tools/generate-image";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
@@ -192,6 +193,7 @@ export async function POST(request: Request) {
                   "createDocument",
                   "updateDocument",
                   "requestSuggestions",
+                  "generateImage",
                 ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
@@ -202,6 +204,7 @@ export async function POST(request: Request) {
               session,
               dataStream,
             }),
+            generateImage: generateImage({ dataStream }),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
